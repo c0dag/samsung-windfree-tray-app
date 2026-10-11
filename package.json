@@ -1,0 +1,18 @@
+{
+  "name": "samsung-windfree-tray-app",
+  "productName": "WindFree",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Painel na bandeja do Windows para controlar ar-condicionado Samsung WindFree pelo SmartThings",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^44.7.0"
+  },
+  "dependencies": {
+    "@smartthings/cli": "^2.1.2",
+    "lucide": "^1.55.0"
+  }
+}

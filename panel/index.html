@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:" />
+    <title>WindFree</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="panel" id="panel" data-loading="true" data-power="off" data-mode="cool" data-fan="auto" data-swing="fixed" data-windfree="false">
+      <section class="view view-main">
+        <header class="top">
+          <div class="readings">
+            <span class="reading">
+              <i data-lucide="thermometer"></i>
+              <span class="reading-label">Ambiente</span>
+              <strong id="room-temp">--</strong>
+            </span>
+            <span class="reading" title="Umidade do ambiente">
+              <i data-lucide="droplet"></i>
+              <strong id="room-humidity">--</strong>
+            </span>
+          </div>
+          <button class="power" id="power" type="button" aria-label="Ligar o ar">
+            <i data-lucide="power"></i>
+          </button>
+        </header>
+
+        <figure class="hero" aria-hidden="true">
+          <svg class="scene" viewBox="0 8 320 156">
+            <defs>
+              <radialGradient id="g-spot" cx="50%" cy="38%" r="60%">
+                <stop offset="0" stop-color="#ffffff" stop-opacity="0.07" />
+                <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+              </radialGradient>
+              <linearGradient id="g-body" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffffff" />
+                <stop offset="0.5" stop-color="#f2f4f6" />
+                <stop offset="1" stop-color="#dde2e7" />
+              </linearGradient>
+              <linearGradient id="g-curve" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#0d1a26" stop-opacity="0.14" />
+                <stop offset="0.09" stop-color="#0d1a26" stop-opacity="0" />
+                <stop offset="0.88" stop-color="#0d1a26" stop-opacity="0" />
+                <stop offset="1" stop-color="#0d1a26" stop-opacity="0.16" />
+              </linearGradient>
+              <linearGradient id="g-under" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#c9d0d7" />
+                <stop offset="1" stop-color="#9ea7b1" />
+              </linearGradient>
+              <linearGradient id="g-outlet" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#07090b" />
+                <stop offset="1" stop-color="#262c33" />
+              </linearGradient>
+              <linearGradient id="g-sheet" x1="0" y1="0" x2="0" y2="1">
+                <stop class="tint-stop" offset="0" stop-opacity="1" />
+                <stop class="tint-stop" offset="1" stop-opacity="0" />
+              </linearGradient>
+              <linearGradient id="g-holes-fade" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#fff" stop-opacity="0" />
+                <stop offset="0.14" stop-color="#fff" stop-opacity="1" />
+                <stop offset="0.86" stop-color="#fff" stop-opacity="1" />
+                <stop offset="1" stop-color="#fff" stop-opacity="0" />
+              </linearGradient>
+              <linearGradient id="g-flow-fade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#fff" stop-opacity="1" />
+                <stop offset="0.45" stop-color="#fff" stop-opacity="0.7" />
+                <stop offset="1" stop-color="#fff" stop-opacity="0" />
+              </linearGradient>
+              <pattern id="p-holes" width="3.1" height="3.1" patternUnits="userSpaceOnUse">
+                <circle class="hole" cx="1.55" cy="1.55" r="0.62" />
+              </pattern>
+              <mask id="m-holes">
+                <rect x="52" y="50" width="216" height="26" fill="url(#g-holes-fade)" />
+              </mask>
+              <mask id="m-flow">
+                <rect x="0" y="86" width="320" height="86" fill="url(#g-flow-fade)" />
+              </mask>
+              <filter id="f-soft" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="1.3" />
+              </filter>
+              <filter id="f-wide" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="9" />
+              </filter>
+              <filter id="f-air" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1.1" result="core" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="halo" />
+                <feMerge>
+                  <feMergeNode in="halo" />
+                  <feMergeNode in="core" />
+                </feMerge>
+              </filter>
+              <filter id="f-contact" x="-20%" y="-200%" width="140%" height="500%">
+                <feGaussianBlur stdDeviation="3.5" />
+              </filter>
+              <filter id="f-glow" x="-50%" y="-80%" width="200%" height="260%">
+                <feGaussianBlur stdDeviation="1.2" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            <ellipse cx="160" cy="62" rx="168" ry="86" fill="url(#g-spot)" />
+            <ellipse class="mode-glow" cx="160" cy="128" rx="112" ry="30" filter="url(#f-wide)" />
+            <ellipse class="contact" cx="160" cy="99" rx="116" ry="4.5" filter="url(#f-contact)" />
+
+            <g class="unit">
+              <rect x="40" y="20" width="240" height="62" rx="14" fill="url(#g-body)" />
+              <rect x="40" y="20" width="240" height="62" rx="14" fill="url(#g-curve)" />
+              <path d="M54 21.4 H266" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" />
+              <rect class="holes" x="52" y="50" width="216" height="26" rx="8" fill="url(#p-holes)" mask="url(#m-holes)" />
+              <text class="unit-display" id="unit-display" x="265" y="40" text-anchor="end" filter="url(#f-glow)">--</text>
+              <path d="M46 80 H274 C274 88 268 94.5 258 95.5 H62 C52 94.5 46 88 46 80 Z" fill="url(#g-under)" />
+              <rect x="70" y="84.5" width="180" height="7.5" rx="3.75" fill="url(#g-outlet)" />
+              <rect class="flap" x="68" y="83.5" width="184" height="9.5" rx="4.75" />
+            </g>
+
+            <g class="airflow" mask="url(#m-flow)">
+              <g class="sway-h">
+                <g class="sway-v">
+                  <path class="sheet" d="M80 90 H240 L282 168 H38 Z" fill="url(#g-sheet)" filter="url(#f-wide)" />
+                  <g id="streaks" filter="url(#f-air)"></g>
+                </g>
+              </g>
+            </g>
+            <g class="drift">
+              <ellipse class="mist" cx="160" cy="116" rx="104" ry="15" filter="url(#f-wide)" />
+              <g id="drift" filter="url(#f-soft)"></g>
+            </g>
+          </svg>
+        </figure>
+
+        <div class="setpoint-row">
+          <div class="setpoint" aria-live="polite">
+            <span class="setpoint-value" id="setpoint">--</span>
+            <span class="setpoint-unit">°C</span>
+          </div>
+          <button class="pill" id="windfree" type="button" role="switch" aria-checked="false">
+            <i data-lucide="feather"></i>
+            <span>WindFree</span>
+            <span class="switch" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="slider-row">
+          <button class="round" id="temp-down" type="button" aria-label="Diminuir a temperatura">
+            <i data-lucide="minus"></i>
+          </button>
+          <div class="track">
+            <input type="range" id="temp" min="16" max="30" step="1" value="23" aria-label="Temperatura desejada" />
+          </div>
+          <button class="round" id="temp-up" type="button" aria-label="Aumentar a temperatura">
+            <i data-lucide="plus"></i>
+          </button>
+        </div>
+        <div class="scale" aria-hidden="true"><span>16°</span><span>30°</span></div>
+
+        <div class="strip">
+          <button class="cell" type="button" data-menu="modo" aria-haspopup="menu">
+            <span class="cell-top"><span class="cell-icon" data-icon-for="modo"></span><i data-lucide="chevron-up" class="cell-chevron"></i></span>
+            <span class="cell-label">Modo</span>
+            <span class="cell-value" data-value-for="modo">--</span>
+          </button>
+          <button class="cell" type="button" data-menu="vento" aria-haspopup="menu">
+            <span class="cell-top"><span class="cell-icon"><i data-lucide="fan"></i></span><i data-lucide="chevron-up" class="cell-chevron"></i></span>
+            <span class="cell-label">Vento</span>
+            <span class="cell-value" data-value-for="vento">--</span>
+          </button>
+          <button class="cell" type="button" id="sleep" role="switch" aria-checked="false">
+            <span class="cell-top"><span class="cell-icon"><i data-lucide="moon"></i></span><span class="cell-dot"></span></span>
+            <span class="cell-label">Sono</span>
+            <span class="cell-value" data-value-for="sono">--</span>
+          </button>
+          <button class="cell" type="button" data-menu="oscilar" aria-haspopup="menu">
+            <span class="cell-top"><span class="cell-icon" data-icon-for="oscilar"></span><i data-lucide="chevron-up" class="cell-chevron"></i></span>
+            <span class="cell-label">Direção</span>
+            <span class="cell-value" data-value-for="oscilar">--</span>
+          </button>
+        </div>
+
+        <footer class="status">
+          <div class="status-message" id="status" data-tone="busy">
+            <span class="status-icon" id="status-icon"></span>
+            <span id="status-text">Conectando ao SmartThings…</span>
+            <button class="status-retry" id="retry" type="button" hidden>Tentar de novo</button>
+          </div>
+          <button class="icon-button" id="open-settings" type="button" aria-label="Abrir ajustes">
+            <i data-lucide="sliders-horizontal"></i>
+          </button>
+        </footer>
+      </section>
+
+      <section class="view view-settings" id="settings" aria-label="Ajustes" inert>
+        <header class="settings-top">
+          <button class="icon-button" id="close-settings" type="button" aria-label="Voltar">
+            <i data-lucide="chevron-left"></i>
+          </button>
+          <div class="settings-heading">
+            <h1>Ajustes</h1>
+            <span class="settings-device" id="device-name"></span>
+          </div>
+        </header>
+
+        <div class="group">
+          <div class="row">
+            <i data-lucide="sun"></i>
+            <span class="row-text"><span class="row-title">Luz do display</span></span>
+            <button class="switch" type="button" role="switch" aria-checked="false" data-setting="display" aria-label="Luz do display"></button>
+          </div>
+          <div class="row">
+            <i data-lucide="volume-2"></i>
+            <span class="row-text"><span class="row-title">Bipe</span><span class="row-note">Apita quando recebe um comando</span></span>
+            <button class="switch" type="button" role="switch" aria-checked="false" data-setting="bipe" aria-label="Bipe"></button>
+          </div>
+          <div class="row">
+            <i data-lucide="wind"></i>
+            <span class="row-text"><span class="row-title">Secagem automática</span><span class="row-note">Seca o aparelho por dentro ao desligar</span></span>
+            <button class="switch" type="button" role="switch" aria-checked="false" data-setting="autoclean" aria-label="Secagem automática"></button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="row">
+            <i data-lucide="air-vent"></i>
+            <span class="row-text">
+              <span class="row-title" id="filter-title">Filtro</span>
+              <span class="row-note" id="filter-note">--</span>
+              <span class="meter" aria-hidden="true"><span id="filter-meter"></span></span>
+            </span>
+          </div>
+          <div class="row">
+            <i data-lucide="zap"></i>
+            <span class="row-text">
+              <span class="row-title">Consumo</span>
+              <span class="row-note" id="energy-note">--</span>
+            </span>
+            <strong class="row-value" id="power-now">--</strong>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="row">
+            <i data-lucide="monitor"></i>
+            <span class="row-text"><span class="row-title">Abrir com o Windows</span></span>
+            <button class="switch" type="button" role="switch" aria-checked="false" id="autostart" aria-label="Abrir com o Windows"></button>
+          </div>
+        </div>
+      </section>
+
+      <div class="menu" id="menu" role="menu" hidden></div>
+    </main>
+
+    <script src="../node_modules/lucide/dist/umd/lucide.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
