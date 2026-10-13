@@ -13,7 +13,7 @@ use std::sync::mpsc::{self, RecvTimeoutError, Sender};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
-use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, State, WindowEvent};
 
 const CLIMATE: &[&str] = &["temp", "modo", "vento", "extra", "oscilar"];
@@ -21,6 +21,9 @@ const POLL_VISIBLE: Duration = Duration::from_secs(15);
 const POLL_HIDDEN: Duration = Duration::from_secs(60);
 const DEBOUNCE: Duration = Duration::from_millis(500);
 const SETTLE: Duration = Duration::from_millis(900);
+// A tray click steals focus on mouse-down, so the blur handler hides the panel just
+// before the click itself arrives; a hide this recent means the click was a "close".
+const BLUR_CLICK_WINDOW: Duration = Duration::from_millis(300);
 
 enum Msg {
     Set(String, J),
@@ -32,6 +35,7 @@ struct Shared {
     view: Mutex<J>,
     tx: Sender<Msg>,
     tray_rect: Mutex<Option<(i32, i32, i32, i32)>>,
+    last_hide: Mutex<Option<Instant>>,
 }
 
 fn data_dir(app: &AppHandle) -> PathBuf {
@@ -345,9 +349,8 @@ fn ac_refresh(state: State<Shared>) {
 }
 
 #[tauri::command]
-fn hide_panel(window: tauri::WebviewWindow) {
-    window.hide().ok();
-    window.app_handle().emit("panel:hide", ()).ok();
+fn hide_panel(app: AppHandle) {
+    hide_panel_window(&app);
 }
 
 #[tauri::command]
@@ -413,6 +416,33 @@ fn show_panel(app: &AppHandle) {
     }
 }
 
+fn hide_panel_window(app: &AppHandle) {
+    if let Some(win) = app.get_webview_window("main") {
+        win.hide().ok();
+    }
+    app.emit("panel:hide", ()).ok();
+    if let Some(shared) = app.try_state::<Shared>() {
+        *shared.last_hide.lock().unwrap() = Some(Instant::now());
+        shared.tx.send(Msg::Visible(false)).ok();
+    }
+}
+
+fn toggle_panel(app: &AppHandle, rect: &tauri::Rect) {
+    let Some(win) = app.get_webview_window("main") else { return };
+    if win.is_visible().unwrap_or(false) {
+        hide_panel_window(app);
+        return;
+    }
+    let Some(shared) = app.try_state::<Shared>() else { return };
+    let hidden_by_this_click = shared.last_hide.lock().unwrap().is_some_and(|t| t.elapsed() < BLUR_CLICK_WINDOW);
+    if hidden_by_this_click {
+        return;
+    }
+    let scale = win.scale_factor().unwrap_or(1.0);
+    *shared.tray_rect.lock().unwrap() = Some(rect_px(rect, scale));
+    show_panel(app);
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -424,7 +454,7 @@ pub fn run() {
             let cert = cert::ensure_cert(&dir).map_err(|e| format!("cert: {e}"))?;
 
             let (tx, rx) = mpsc::channel::<Msg>();
-            app.manage(Shared { view: Mutex::new(json!({ "device": J::Null, "syncing": false, "held": [], "error": J::Null, "updatedAt": J::Null, "source": "local" })), tx, tray_rect: Mutex::new(None) });
+            app.manage(Shared { view: Mutex::new(json!({ "device": J::Null, "syncing": false, "held": [], "error": J::Null, "updatedAt": J::Null, "source": "local" })), tx, tray_rect: Mutex::new(None), last_hide: Mutex::new(None) });
 
             let menu = MenuBuilder::new(app)
                 .item(&MenuItemBuilder::with_id("open", "Abrir painel").build(app)?)
@@ -437,6 +467,7 @@ pub fn run() {
                 .icon(icon::tray_icon(None, false, [150, 160, 170]))
                 .tooltip("WindFree")
                 .menu(&menu)
+                .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id().as_ref() {
                     "open" => show_panel(app),
                     "refresh" => {
@@ -448,13 +479,8 @@ pub fn run() {
                     _ => {}
                 })
                 .on_tray_icon_event(|tray, event| {
-                    if let TrayIconEvent::Click { button: MouseButton::Left, rect, .. } = &event {
-                        let app = tray.app_handle();
-                        let scale = app.get_webview_window("main").and_then(|w| w.scale_factor().ok()).unwrap_or(1.0);
-                        if let Some(s) = app.try_state::<Shared>() {
-                            *s.tray_rect.lock().unwrap() = Some(rect_px(rect, scale));
-                        }
-                        show_panel(app);
+                    if let TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, rect, .. } = &event {
+                        toggle_panel(tray.app_handle(), rect);
                     }
                 })
                 .build(app)?;
@@ -463,13 +489,7 @@ pub fn run() {
                 let h2 = handle.clone();
                 win.on_window_event(move |e| {
                     if let WindowEvent::Focused(false) = e {
-                        if let Some(w) = h2.get_webview_window("main") {
-                            w.hide().ok();
-                        }
-                        h2.emit("panel:hide", ()).ok();
-                        if let Some(s) = h2.try_state::<Shared>() {
-                            s.tx.send(Msg::Visible(false)).ok();
-                        }
+                        hide_panel_window(&h2);
                     }
                 });
             }
