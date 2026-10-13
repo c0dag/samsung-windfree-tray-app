@@ -297,7 +297,7 @@ svg.lucide {
   transition: opacity 0.5s;
 }
 
-.panel[data-power='on'][data-display='on'] .unit-display {
+.panel[data-showtemp='1'] .unit-display {
   opacity: 0.95;
 }
 
@@ -1000,3 +1000,61 @@ svg.lucide {
     animation: none !important;
   }
 }
+
+
+/* Favoritos (presets) */
+.preset-save { flex: none; height: 30px; padding: 0 12px; border-radius: 999px; font-size: 13px; color: var(--porcelain); background: color-mix(in srgb, var(--accent) 16%, var(--slate-raised)); box-shadow: inset 0 0 0 1px var(--hairline); transition: opacity 0.2s, background 0.2s; }
+.preset-save:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 26%, var(--slate-raised)); }
+.preset-save:disabled { opacity: 0.4; }
+.preset-list { display: flex; flex-direction: column; }
+.preset-row { display: flex; align-items: center; box-shadow: inset 0 1px 0 var(--hairline); }
+.preset-apply { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; height: 46px; padding: 0 14px; font-size: 14px; color: var(--porcelain); transition: background 0.2s; }
+.preset-apply:hover { background: rgba(255, 255, 255, 0.03); }
+.preset-apply svg.lucide { font-size: 15px; color: var(--accent); }
+.preset-apply span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.preset-del { display: grid; place-items: center; width: 44px; height: 46px; font-size: 15px; color: var(--dim); transition: color 0.2s; }
+.preset-del:hover { color: var(--signal); }
+.preset-empty { display: block; padding: 12px 14px; font-size: 12px; color: var(--fog); }
+
+
+/* Extras: alertas, energia, timer */
+.view-settings { overflow-y: auto; }
+.alert-banner { display: flex; align-items: center; gap: 8px; margin: 10px 16px -4px; padding: 9px 12px; border-radius: 12px; font-size: 13px; color: var(--amber); background: color-mix(in srgb, var(--amber) 12%, var(--slate)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--amber) 30%, transparent); }
+.alert-banner svg.lucide { font-size: 15px; }
+.price-field { display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 10px; border-radius: 9px; background: var(--slate-raised); box-shadow: inset 0 0 0 1px var(--hairline); font-size: 13px; color: var(--fog); }
+.price-field input { width: 46px; background: none; border: 0; color: var(--porcelain); font: inherit; text-align: right; }
+.price-field input:focus { outline: none; }
+.chart-wrap { padding: 2px 14px 12px; }
+#energy-chart { width: 100%; height: 48px; display: block; }
+.energy-bar { fill: color-mix(in srgb, var(--accent) 55%, var(--slate-raised)); }
+.chip-row { display: flex; gap: 6px; padding: 0 14px 12px; }
+.chip { flex: 1; height: 32px; border-radius: 9px; font-size: 13px; color: var(--fog); background: var(--slate-raised); box-shadow: inset 0 0 0 1px var(--hairline); transition: color 0.2s, background 0.2s; }
+.chip:hover { color: var(--porcelain); }
+.chip.on { color: var(--graphite); background: var(--accent); font-weight: 600; }
+.mini-select { flex: none; height: 30px; padding: 0 8px; border-radius: 9px; font-size: 13px; color: var(--porcelain); background: var(--slate-raised); box-shadow: inset 0 0 0 1px var(--hairline); border: 0; }
+
+/* ===== Herói com modelo 3D ===== */
+.hero { position: relative; height: 158px; margin: 0; overflow: visible; }
+.unit-img {
+  position: absolute; top: 24px; left: 50%; width: 290px;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 14px 15px rgba(0, 0, 0, 0.5));
+  transition: filter 0.6s;
+  -webkit-user-drag: none;
+}
+.panel[data-power='off'] .unit-img {
+  filter: drop-shadow(0 14px 15px rgba(0, 0, 0, 0.5)) brightness(0.9) saturate(0.92);
+}
+.flow { position: absolute; left: 0; top: 20px; width: 100%; height: 190px; overflow: visible; pointer-events: none; }
+.sway-h, .sway-v { transform-box: view-box; transform-origin: 171px 100px; }
+.unit-display {
+  position: absolute; top: 24px; left: 50%; width: 290px; z-index: 2;
+  transform: translateX(-50%);
+  clip-path: inset(68.5% 3.5% 9% 78%);
+  pointer-events: none; -webkit-user-drag: none;
+  opacity: 0; transition: opacity 0.4s;
+}
+.panel[data-showtemp='1'] .unit-display { opacity: 1; }
+.alert-banner[hidden] { display: none; }
+.chart-wrap[hidden] { display: none; }
+::-webkit-scrollbar { width: 0; height: 0; background: transparent; }

@@ -86,6 +86,16 @@ function isWindFree(extra) {
   return extra === 'windFree' || extra === 'windFreeSleep';
 }
 
+const SWING_CLIP = { vertical: 'swing-v', horizontal: 'swing-h', all: 'swing-all' };
+
+function unitImageFor(device) {
+  if (!device.ligado || isWindFree(device.extra)) return 'assets/ac-unit-closed.png';
+  const clip = SWING_CLIP[device.oscilar];
+  if (clip) return `assets/${clip}.webp`;
+  const temp = Math.min(30, Math.max(16, device.temp ?? 23));
+  return `assets/ac-${temp}.png`;
+}
+
 function isSleep(extra) {
   return extra === 'sleep' || extra === 'windFreeSleep';
 }
@@ -127,10 +137,10 @@ function buildStreaks() {
   for (let index = 0; index < count; index += 1) {
     const position = index / (count - 1);
     const fadeAtEdges = 1 - Math.abs(position - 0.5) * 0.9;
-    const x = 78 + position * 164;
-    const spread = (x - 160) * 0.45;
+    const x = 58 + position * 226;
+    const spread = (x - 171) * 0.5;
     const bend = random(-6, 6);
-    const d = `M${x.toFixed(1)} 91 C${(x + bend).toFixed(1)} 112 ${(x + spread * 0.5 - bend).toFixed(1)} 138 ${(x + spread).toFixed(1)} 166`;
+    const d = `M${x.toFixed(1)} 100 C${(x + bend).toFixed(1)} 120 ${(x + spread * 0.5 - bend).toFixed(1)} 148 ${(x + spread).toFixed(1)} 176`;
     const dash = random(26, 54);
     const gap = random(60, 120);
     const pulse = airPath('pulse', d, random(1.6, 3.6), random(0.3, 0.65) * fadeAtEdges);
@@ -145,14 +155,14 @@ function buildStreaks() {
 function buildDrift() {
   const group = byId('drift');
   for (let index = 0; index < 44; index += 1) {
-    const x = random(64, 256);
+    const x = random(58, 284);
     const dot = document.createElementNS(SVG_NS, 'circle');
     dot.setAttribute('class', 'dot');
     dot.setAttribute('cx', x.toFixed(1));
-    dot.setAttribute('cy', random(88, 98).toFixed(1));
+    dot.setAttribute('cy', random(46, 72).toFixed(1));
     dot.setAttribute('r', random(0.9, 2.1).toFixed(2));
-    dot.style.setProperty('--dx', `${((x - 160) * 0.12 + random(-6, 6)).toFixed(1)}px`);
-    dot.style.setProperty('--dy', `${random(22, 62).toFixed(1)}px`);
+    dot.style.setProperty('--dx', `${((x - 171) * 0.12 + random(-6, 6)).toFixed(1)}px`);
+    dot.style.setProperty('--dy', `${random(30, 74).toFixed(1)}px`);
     dot.style.setProperty('--dur', `${random(3.4, 7).toFixed(2)}s`);
     dot.style.setProperty('--delay', `${(-random(0, 7)).toFixed(2)}s`);
     group.append(dot);
@@ -214,10 +224,19 @@ function renderDevice(device) {
     swing: device.oscilar,
     windfree: String(isWindFree(device.extra)),
     display: device.display,
+    showtemp: device.ligado && (SWING_CLIP[device.oscilar] || isWindFree(device.extra)) ? '1' : '0',
   });
+  const unitImg = document.querySelector('.unit-img');
+  if (unitImg) {
+    const file = unitImageFor(device);
+    if (!unitImg.getAttribute('src').endsWith(file)) unitImg.setAttribute('src', file);
+  }
   byId('room-temp').textContent = `${device.ambiente}°`;
   byId('room-humidity').textContent = `${device.umidade}%`;
-  byId('unit-display').textContent = device.temp;
+  const disp = byId('unit-display');
+  const dtemp = Math.min(TEMP_MAX, Math.max(TEMP_MIN, device.temp));
+  const dfile = `assets/ac-${dtemp}.png`;
+  if (!disp.getAttribute('src')?.endsWith(dfile)) disp.setAttribute('src', dfile);
   byId('power').setAttribute('aria-label', device.ligado ? 'Desligar o ar' : 'Ligar o ar');
   byId('windfree').setAttribute('aria-checked', String(isWindFree(device.extra)));
   byId('temp-down').disabled = device.temp <= TEMP_MIN;
@@ -241,7 +260,7 @@ function statusFor(current) {
   if (!current?.device) return { tone: 'busy', icon: 'loader-circle', text: 'Conectando ao SmartThings…' };
   if (current.syncing) return { tone: 'busy', icon: 'loader-circle', text: 'Sincronizando…' };
   if (current.held.length > 0) return { tone: 'quiet', icon: 'clock', text: 'Aplica quando ligar' };
-  return { tone: 'ok', icon: 'shield-check', text: 'Conectado' };
+  return { tone: 'ok', icon: 'shield-check', text: `Conectado · ${current?.source === 'cloud' ? 'nuvem' : 'local'}` };
 }
 
 function renderStatus() {

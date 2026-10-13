@@ -25,110 +25,39 @@
             <i data-lucide="power"></i>
           </button>
         </header>
+        <div class="alert-banner" id="alert-banner" hidden></div>
 
         <figure class="hero" aria-hidden="true">
-          <svg class="scene" viewBox="0 8 320 156">
+          <img class="unit-img" src="assets/ac-unit.png" alt="" />
+          <img class="unit-display" id="unit-display" alt="" />
+          <svg class="flow" viewBox="0 0 372 190">
             <defs>
-              <radialGradient id="g-spot" cx="50%" cy="38%" r="60%">
-                <stop offset="0" stop-color="#ffffff" stop-opacity="0.07" />
-                <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
-              </radialGradient>
-              <linearGradient id="g-body" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#ffffff" />
-                <stop offset="0.5" stop-color="#f2f4f6" />
-                <stop offset="1" stop-color="#dde2e7" />
-              </linearGradient>
-              <linearGradient id="g-curve" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#0d1a26" stop-opacity="0.14" />
-                <stop offset="0.09" stop-color="#0d1a26" stop-opacity="0" />
-                <stop offset="0.88" stop-color="#0d1a26" stop-opacity="0" />
-                <stop offset="1" stop-color="#0d1a26" stop-opacity="0.16" />
-              </linearGradient>
-              <linearGradient id="g-under" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#c9d0d7" />
-                <stop offset="1" stop-color="#9ea7b1" />
-              </linearGradient>
-              <linearGradient id="g-outlet" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#07090b" />
-                <stop offset="1" stop-color="#262c33" />
-              </linearGradient>
               <linearGradient id="g-sheet" x1="0" y1="0" x2="0" y2="1">
-                <stop class="tint-stop" offset="0" stop-opacity="1" />
+                <stop class="tint-stop" offset="0" stop-opacity="0.85" />
                 <stop class="tint-stop" offset="1" stop-opacity="0" />
-              </linearGradient>
-              <linearGradient id="g-holes-fade" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#fff" stop-opacity="0" />
-                <stop offset="0.14" stop-color="#fff" stop-opacity="1" />
-                <stop offset="0.86" stop-color="#fff" stop-opacity="1" />
-                <stop offset="1" stop-color="#fff" stop-opacity="0" />
               </linearGradient>
               <linearGradient id="g-flow-fade" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stop-color="#fff" stop-opacity="1" />
-                <stop offset="0.45" stop-color="#fff" stop-opacity="0.7" />
+                <stop offset="0.55" stop-color="#fff" stop-opacity="0.65" />
                 <stop offset="1" stop-color="#fff" stop-opacity="0" />
               </linearGradient>
-              <pattern id="p-holes" width="3.1" height="3.1" patternUnits="userSpaceOnUse">
-                <circle class="hole" cx="1.55" cy="1.55" r="0.62" />
-              </pattern>
-              <mask id="m-holes">
-                <rect x="52" y="50" width="216" height="26" fill="url(#g-holes-fade)" />
-              </mask>
-              <mask id="m-flow">
-                <rect x="0" y="86" width="320" height="86" fill="url(#g-flow-fade)" />
-              </mask>
-              <filter id="f-soft" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="1.3" />
-              </filter>
-              <filter id="f-wide" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="9" />
-              </filter>
+              <mask id="m-flow"><rect x="0" y="96" width="372" height="92" fill="url(#g-flow-fade)" /></mask>
               <filter id="f-air" x="-30%" y="-30%" width="160%" height="160%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="1.1" result="core" />
-                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="halo" />
-                <feMerge>
-                  <feMergeNode in="halo" />
-                  <feMergeNode in="core" />
-                </feMerge>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1.1" result="c" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="h" />
+                <feMerge><feMergeNode in="h" /><feMergeNode in="c" /></feMerge>
               </filter>
-              <filter id="f-contact" x="-20%" y="-200%" width="140%" height="500%">
-                <feGaussianBlur stdDeviation="3.5" />
-              </filter>
-              <filter id="f-glow" x="-50%" y="-80%" width="200%" height="260%">
-                <feGaussianBlur stdDeviation="1.2" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
+              <filter id="f-wide" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9" /></filter>
+              <filter id="f-soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="1.1" /></filter>
             </defs>
-
-            <ellipse cx="160" cy="62" rx="168" ry="86" fill="url(#g-spot)" />
-            <ellipse class="mode-glow" cx="160" cy="128" rx="112" ry="30" filter="url(#f-wide)" />
-            <ellipse class="contact" cx="160" cy="99" rx="116" ry="4.5" filter="url(#f-contact)" />
-
-            <g class="unit">
-              <rect x="40" y="20" width="240" height="62" rx="14" fill="url(#g-body)" />
-              <rect x="40" y="20" width="240" height="62" rx="14" fill="url(#g-curve)" />
-              <path d="M54 21.4 H266" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" />
-              <rect class="holes" x="52" y="50" width="216" height="26" rx="8" fill="url(#p-holes)" mask="url(#m-holes)" />
-              <text class="unit-display" id="unit-display" x="265" y="40" text-anchor="end" filter="url(#f-glow)">--</text>
-              <path d="M46 80 H274 C274 88 268 94.5 258 95.5 H62 C52 94.5 46 88 46 80 Z" fill="url(#g-under)" />
-              <rect x="70" y="84.5" width="180" height="7.5" rx="3.75" fill="url(#g-outlet)" />
-              <rect class="flap" x="68" y="83.5" width="184" height="9.5" rx="4.75" />
-            </g>
-
+            <ellipse class="mode-glow" cx="171" cy="100" rx="118" ry="24" filter="url(#f-wide)" />
             <g class="airflow" mask="url(#m-flow)">
-              <g class="sway-h">
-                <g class="sway-v">
-                  <path class="sheet" d="M80 90 H240 L282 168 H38 Z" fill="url(#g-sheet)" filter="url(#f-wide)" />
-                  <g id="streaks" filter="url(#f-air)"></g>
-                </g>
-              </g>
+              <g class="sway-h"><g class="sway-v">
+                <path class="sheet" d="M98 102 H244 L286 176 H56 Z" fill="url(#g-sheet)" filter="url(#f-wide)" />
+                <g id="streaks" filter="url(#f-air)"></g>
+              </g></g>
             </g>
-            <g class="drift">
-              <ellipse class="mist" cx="160" cy="116" rx="104" ry="15" filter="url(#f-wide)" />
-              <g id="drift" filter="url(#f-soft)"></g>
-            </g>
+            <g class="drift"><g id="drift" filter="url(#f-soft)"></g></g>
           </svg>
         </figure>
 
@@ -205,6 +134,54 @@
 
         <div class="group">
           <div class="row">
+            <i data-lucide="star"></i>
+            <span class="row-text"><span class="row-title">Favoritos</span></span>
+            <button class="preset-save" id="preset-save" type="button" disabled>Salvar atual</button>
+          </div>
+          <div class="preset-list" id="preset-list"></div>
+        </div>
+
+        <div class="group">
+          <div class="row">
+            <i data-lucide="zap"></i>
+            <span class="row-text"><span class="row-title">Energia</span><span class="row-note" id="cost-note">—</span></span>
+            <div class="price-field"><span>R$</span><input id="kwh-price" type="text" inputmode="decimal" /></div>
+          </div>
+          <div class="chart-wrap"><svg id="energy-chart" viewBox="0 0 320 58" preserveAspectRatio="none"></svg></div>
+        </div>
+        <div class="group">
+          <div class="row">
+            <i data-lucide="timer"></i>
+            <span class="row-text"><span class="row-title">Desligar em</span><span class="row-note" id="timer-note">Nenhum</span></span>
+          </div>
+          <div class="chip-row" id="timer-chips">
+            <button class="chip on" data-h="0" type="button">Nunca</button>
+            <button class="chip" data-h="1" type="button">1h</button>
+            <button class="chip" data-h="2" type="button">2h</button>
+            <button class="chip" data-h="4" type="button">4h</button>
+            <button class="chip" data-h="8" type="button">8h</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="row">
+            <i data-lucide="bell"></i>
+            <span class="row-text"><span class="row-title">Avisar pra lavar o filtro</span></span>
+            <button class="switch" type="button" role="switch" data-alert="filtro" aria-label="Alerta de filtro"></button>
+          </div>
+          <div class="row">
+            <i data-lucide="cloud-off"></i>
+            <span class="row-text"><span class="row-title">Avisar se o ar sumir</span></span>
+            <button class="switch" type="button" role="switch" data-alert="offline" aria-label="Alerta offline"></button>
+          </div>
+          <div class="row">
+            <i data-lucide="clock"></i>
+            <span class="row-text"><span class="row-title">Avisar se ficar ligado demais</span></span>
+            <select class="mini-select" id="alert-longo"><option value="0">Nunca</option><option value="4">4h</option><option value="8">8h</option><option value="12">12h</option></select>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="row">
             <i data-lucide="sun"></i>
             <span class="row-text"><span class="row-title">Luz do display</span></span>
             <button class="switch" type="button" role="switch" aria-checked="false" data-setting="display" aria-label="Luz do display"></button>
@@ -252,7 +229,10 @@
       <div class="menu" id="menu" role="menu" hidden></div>
     </main>
 
-    <script src="../node_modules/lucide/dist/umd/lucide.min.js"></script>
+    <script src="lucide.min.js"></script>
+    <script src="shim.js"></script>
     <script src="app.js"></script>
+    <script src="features.js"></script>
+    <script src="extras.js"></script>
   </body>
 </html>

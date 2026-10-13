@@ -1,18 +1,12 @@
 {
-  "name": "samsung-windfree-tray-app",
-  "productName": "WindFree",
-  "version": "1.0.0",
+  "name": "windfree-tauri",
   "private": true,
-  "description": "Painel na bandeja do Windows para controlar ar-condicionado Samsung WindFree pelo SmartThings",
-  "main": "main.js",
+  "version": "0.1.0",
+  "type": "module",
   "scripts": {
-    "start": "electron ."
+    "tauri": "tauri"
   },
   "devDependencies": {
-    "electron": "^44.7.0"
-  },
-  "dependencies": {
-    "@smartthings/cli": "^2.1.2",
-    "lucide": "^1.55.0"
+    "@tauri-apps/cli": "^2"
   }
 }
