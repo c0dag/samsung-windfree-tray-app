@@ -1,12 +1,16 @@
-// Find Samsung OCF air conditioners on the LAN (no cloud, no multicast which many
-// routers drop): one small CoAP GET /oic/res per host on UDP 5683 finds the OCF
-// devices, then DTLS + oic/d gives each one's id.
+// Find Samsung OCF air conditioners on the LAN (no cloud): CoAP GET /oic/res to the OCF
+// multicast group and to every host on UDP 5683 finds the OCF devices, then DTLS + oic/d
+// tells which are air conditioners and gives each one's id.
 use crate::ac::{LocalAc, Status};
 use std::collections::BTreeSet;
-use std::net::UdpSocket;
+use std::net::{Ipv4Addr, UdpSocket};
 use std::time::{Duration, Instant};
 
 const COAP_PORT: u16 = 5683;
+// Units answer /oic/res from their own ephemeral port (49153), not 5683, so with Windows
+// Firewall on the unicast replies are dropped as unsolicited, while replies to a multicast
+// request are let through. Some routers drop multicast, so both are sent.
+const OCF_MULTICAST: Ipv4Addr = Ipv4Addr::new(224, 0, 1, 187);
 // Units in Wi-Fi power save can sleep through a single packet, so the sweep is resent a
 // few times and listened to for longer than one round trip.
 const SWEEP_ROUNDS: u32 = 3;
@@ -55,6 +59,7 @@ fn sweep(base: &str) -> BTreeSet<String> {
     let mut buf = [0u8; 2048];
     while start.elapsed() < SWEEP_WINDOW {
         if rounds < SWEEP_ROUNDS && start.elapsed() >= SWEEP_RESEND * rounds {
+            let _ = sock.send_to(&res_get(0), (OCF_MULTICAST, COAP_PORT));
             for i in 1..=254u8 {
                 let _ = sock.send_to(&res_get(i as u16), (format!("{base}.{i}").as_str(), COAP_PORT));
             }

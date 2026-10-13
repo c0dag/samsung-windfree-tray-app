@@ -162,6 +162,9 @@ impl LocalAc {
         let cert = openssl::x509::X509::from_pem(cert_pem.as_bytes()).map_err(|e| e.to_string())?;
         let key = openssl::pkey::PKey::private_key_from_pem(key_pem.as_bytes()).map_err(|e| e.to_string())?;
         let mut b = SslConnector::builder(SslMethod::dtls()).map_err(|e| e.to_string())?;
+        // Some units' TizenRT/mbedTLS firmware answers OpenSSL's default ClientHello with
+        // handshake_failure; this is the suite every unit negotiates.
+        b.set_cipher_list("ECDHE-ECDSA-AES128-GCM-SHA256").map_err(|e| e.to_string())?;
         b.set_certificate(&cert).map_err(|e| e.to_string())?;
         b.set_private_key(&key).map_err(|e| e.to_string())?;
         b.set_verify(SslVerifyMode::NONE);
