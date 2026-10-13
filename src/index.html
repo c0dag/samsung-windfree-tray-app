@@ -223,6 +223,68 @@
             <span class="row-text"><span class="row-title">Abrir com o Windows</span></span>
             <button class="switch" type="button" role="switch" aria-checked="false" id="autostart" aria-label="Abrir com o Windows"></button>
           </div>
+          <div class="row">
+            <i data-lucide="wifi"></i>
+            <span class="row-text"><span class="row-title">Aparelho</span><span class="row-note" id="device-note">--</span></span>
+            <button class="preset-save" id="change-device" type="button">Trocar</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view view-setup" id="setup" aria-label="Escolher o ar-condicionado" data-step="scanning" inert>
+        <header class="settings-top">
+          <button class="icon-button" id="setup-back" type="button" aria-label="Voltar" hidden>
+            <i data-lucide="chevron-left"></i>
+          </button>
+          <div class="settings-heading">
+            <h1>Seu ar-condicionado</h1>
+            <span class="settings-device">Controle direto pela rede, sem nuvem</span>
+          </div>
+        </header>
+
+        <div class="setup-step" data-for="scanning">
+          <div class="setup-hero">
+            <i data-lucide="loader-circle" class="spin"></i>
+            <p class="setup-title">Procurando na sua rede…</p>
+            <p class="setup-note">Leva alguns segundos.</p>
+          </div>
+        </div>
+
+        <div class="setup-step" data-for="found">
+          <p class="setup-note" id="setup-found-title"></p>
+          <div class="group setup-list" id="setup-list" role="radiogroup" aria-label="Ares-condicionados encontrados"></div>
+          <label class="setup-field">
+            <span>Nome</span>
+            <input id="setup-name" type="text" maxlength="24" placeholder="Ex.: Quarto" />
+          </label>
+          <button class="setup-primary" id="setup-use" type="button">Usar este</button>
+          <button class="setup-link" id="setup-rescan" type="button">Procurar de novo</button>
+        </div>
+
+        <div class="setup-step" data-for="empty">
+          <div class="setup-hero">
+            <i data-lucide="wifi-off"></i>
+            <p class="setup-title">Nenhum ar-condicionado encontrado</p>
+            <p class="setup-note" id="setup-reason"></p>
+          </div>
+          <ul class="group setup-tips">
+            <li>O PC precisa estar na mesma rede Wi‑Fi do ar.</li>
+            <li>Se tiver uma VPN ligada, desligue.</li>
+            <li>O ar precisa ter sido configurado antes no app SmartThings.</li>
+          </ul>
+          <button class="setup-primary" id="setup-retry" type="button">Procurar de novo</button>
+          <button class="setup-link" id="setup-manual" type="button">Digitar o IP do ar</button>
+        </div>
+
+        <div class="setup-step" data-for="manual">
+          <label class="setup-field">
+            <span>IP do ar-condicionado</span>
+            <input id="setup-ip" type="text" inputmode="decimal" placeholder="192.168.0.20" />
+          </label>
+          <p class="setup-note setup-error" id="setup-ip-error" hidden></p>
+          <p class="setup-note">O IP aparece na página do roteador, na lista de aparelhos conectados.</p>
+          <button class="setup-primary" id="setup-connect" type="button">Conectar</button>
+          <button class="setup-link" id="setup-manual-back" type="button">Voltar</button>
         </div>
       </section>
 
@@ -234,5 +296,6 @@
     <script src="app.js"></script>
     <script src="features.js"></script>
     <script src="extras.js"></script>
+    <script src="onboarding.js"></script>
   </body>
 </html>

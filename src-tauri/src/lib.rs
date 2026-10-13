@@ -29,11 +29,13 @@ enum Msg {
     Set(String, J),
     Refresh,
     Visible(bool),
+    Choose(Device),
 }
 
 struct Shared {
     view: Mutex<J>,
     tx: Sender<Msg>,
+    cert: (String, String),
     tray_rect: Mutex<Option<(i32, i32, i32, i32)>>,
     last_hide: Mutex<Option<Instant>>,
 }
@@ -139,6 +141,8 @@ impl Worker {
         let held: Vec<String> = self.pending.keys().filter(|k| !sendable.contains_key(*k)).cloned().collect();
         json!({
             "device": self.device_json(),
+            "setup": self.device.is_none(),
+            "ip": self.device.as_ref().and_then(|d| d.ip.clone()),
             "syncing": self.running || !sendable.is_empty(),
             "held": held,
             "error": self.error,
@@ -172,17 +176,10 @@ impl Worker {
     }
 
     fn ensure_connected(&mut self) -> Result<(), String> {
-        if self.device.is_none() {
-            let found = discover::discover(&self.cert.0, &self.cert.1);
-            let first = found.into_iter().next().ok_or("nenhum ar encontrado na rede")?;
-            let d = Device { id: first.di, nome: "Ar-condicionado".into(), ip: Some(first.ip) };
-            save_device(&self.dir, &d);
-            self.device = Some(d);
-        }
         if self.ac.is_some() {
             return Ok(());
         }
-        let dev = self.device.clone().unwrap();
+        let dev = self.device.clone().ok_or("Nenhum ar-condicionado escolhido")?;
         if let Some(ip) = &dev.ip {
             if let Ok(mut ac) = LocalAc::connect(ip, &self.cert.0, &self.cert.1) {
                 if ac.device_id().as_deref() == Some(&dev.id) {
@@ -191,8 +188,8 @@ impl Worker {
                 }
             }
         }
-        let ip = discover::resolve_ip(&dev.id, &self.cert.0, &self.cert.1).ok_or("ar nao encontrado na rede")?;
-        self.ac = Some(LocalAc::connect(&ip, &self.cert.0, &self.cert.1)?);
+        let ip = discover::resolve_ip(&dev.id, &self.cert.0, &self.cert.1).ok_or("Ar não encontrado na rede")?;
+        self.ac = Some(LocalAc::connect(&ip, &self.cert.0, &self.cert.1).map_err(|_| "O ar não respondeu".to_string())?);
         let mut d = dev;
         d.ip = Some(ip);
         save_device(&self.dir, &d);
@@ -208,6 +205,11 @@ impl Worker {
     }
 
     fn run_refresh(&mut self) {
+        if self.device.is_none() {
+            self.last_poll = Instant::now();
+            self.emit();
+            return;
+        }
         self.running = true;
         self.emit();
         match self.read_status() {
@@ -289,6 +291,17 @@ impl Worker {
         self.emit();
     }
 
+    fn choose(&mut self, d: Device) {
+        save_device(&self.dir, &d);
+        self.device = Some(d);
+        self.ac = None;
+        self.confirmed = None;
+        self.pending.clear();
+        self.inflight.clear();
+        self.error = None;
+        self.run_refresh();
+    }
+
     fn set(&mut self, key: String, value: J) {
         let same = self.confirmed.as_ref().and_then(|c| serde_json::to_value(c).ok()).and_then(|v| v.get(&key).cloned()) == Some(value.clone())
             && !self.inflight.contains_key(&key);
@@ -320,6 +333,7 @@ fn worker_loop(mut w: Worker, rx: mpsc::Receiver<Msg>) {
             Ok(Msg::Set(k, v)) => w.set(k, v),
             Ok(Msg::Refresh) => w.run_refresh(),
             Ok(Msg::Visible(b)) => w.visible = b,
+            Ok(Msg::Choose(d)) => w.choose(d),
             Err(RecvTimeoutError::Timeout) => {
                 if !w.sendable().is_empty() && Instant::now() >= w.last_set + DEBOUNCE {
                     w.flush();
@@ -346,6 +360,40 @@ fn ac_set(state: State<Shared>, key: String, value: J) {
 #[tauri::command]
 fn ac_refresh(state: State<Shared>) {
     state.tx.send(Msg::Refresh).ok();
+}
+
+fn found_json(f: &discover::Found) -> J {
+    json!({ "ip": f.ip, "id": f.di, "ligado": f.status.ligado, "temp": f.status.temp, "ambiente": f.status.ambiente })
+}
+
+// Discovery blocks for a few seconds (LAN sweep plus a DTLS handshake per unit), so it
+// runs off the main thread.
+#[tauri::command]
+async fn scan_devices(state: State<'_, Shared>) -> Result<J, String> {
+    let (cert, key) = state.cert.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let scan = discover::scan(&cert, &key);
+        json!({
+            "network": scan.network,
+            "responded": scan.responded,
+            "found": scan.found.iter().map(found_json).collect::<Vec<_>>(),
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn probe_ip(state: State<'_, Shared>, ip: String) -> Result<J, String> {
+    let (cert, key) = state.cert.clone();
+    tauri::async_runtime::spawn_blocking(move || discover::probe(ip.trim(), &cert, &key).map(|f| found_json(&f)))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+fn choose_device(state: State<Shared>, id: String, ip: String, nome: String) {
+    state.tx.send(Msg::Choose(Device { id, nome, ip: Some(ip) })).ok();
 }
 
 #[tauri::command]
@@ -454,7 +502,7 @@ pub fn run() {
             let cert = cert::ensure_cert(&dir).map_err(|e| format!("cert: {e}"))?;
 
             let (tx, rx) = mpsc::channel::<Msg>();
-            app.manage(Shared { view: Mutex::new(json!({ "device": J::Null, "syncing": false, "held": [], "error": J::Null, "updatedAt": J::Null, "source": "local" })), tx, tray_rect: Mutex::new(None), last_hide: Mutex::new(None) });
+            app.manage(Shared { view: Mutex::new(json!({ "device": J::Null, "syncing": false, "held": [], "error": J::Null, "updatedAt": J::Null, "source": "local" })), tx, cert: cert.clone(), tray_rect: Mutex::new(None), last_hide: Mutex::new(None) });
 
             let menu = MenuBuilder::new(app)
                 .item(&MenuItemBuilder::with_id("open", "Abrir painel").build(app)?)
@@ -498,7 +546,7 @@ pub fn run() {
             std::thread::spawn(move || worker_loop(worker, rx));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_state, ac_set, ac_refresh, hide_panel, get_autostart, set_autostart])
+        .invoke_handler(tauri::generate_handler![get_state, ac_set, ac_refresh, hide_panel, get_autostart, set_autostart, scan_devices, probe_ip, choose_device])
         .build(tauri::generate_context!())
         .expect("erro ao iniciar o Tauri")
         .run(|_app, event| {

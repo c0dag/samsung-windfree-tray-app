@@ -39,20 +39,15 @@ generates and caches the cert on first run; nothing is ever sent to the cloud.
 ## Setup
 
 1. Install the app (grab the installer from **Releases**, or build from source below).
-2. Tell it which unit to control with a `device.json` in the app's data folder
-   (`%APPDATA%\com.windfree.tray\device.json`):
+2. On first run it scans your network and lists the air conditioners it finds, each
+   with its current state (on/off, set and room temperature) so you can tell them
+   apart. Pick yours, give it a name, done — no ids or config files.
+3. Nothing found? Make sure the PC is on the same Wi‑Fi as the AC with any VPN off,
+   and that the AC was set up in the SmartThings app at least once. You can also
+   type its IP (shown in your router's list of connected devices).
 
-   ```json
-   { "id": "YOUR-SMARTTHINGS-DEVICE-ID", "nome": "Living room" }
-   ```
-
-   Get the device id from the SmartThings API
-   (`GET https://api.smartthings.com/v1/devices` with a personal access token) or
-   from the device details in the SmartThings app.
-3. The app finds that unit on your LAN and controls it locally.
-
-> `device.json` and the generated certificate stay on your machine — they are
-> git‑ignored and never leave your network.
+To switch units later: **Ajustes → Aparelho → Trocar**. Your choice and the generated
+certificate stay on your machine and never leave your network.
 
 ## Build from source
 

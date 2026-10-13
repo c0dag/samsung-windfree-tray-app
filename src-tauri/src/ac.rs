@@ -207,6 +207,18 @@ impl LocalAc {
         self.get("oic/d").and_then(|v| get_text(&v, "di"))
     }
 
+    // TVs, fridges and other SmartThings appliances answer the same discovery and accept
+    // the same cert, so only take units that report themselves as air conditioners.
+    pub fn air_conditioner_id(&mut self) -> Option<String> {
+        let d = self.get("oic/d")?;
+        let is_ac = matches!(cbor_get(&d, "rt"), Some(Value::Array(rt)) if rt.iter().filter_map(as_text).any(|t| t == "oic.d.airconditioner"));
+        if is_ac {
+            get_text(&d, "di")
+        } else {
+            None
+        }
+    }
+
     pub fn get_status(&mut self, nome: Option<String>) -> Status {
         let power = self.get("power/vs/0");
         let mode = self.get("mode/vs/0");

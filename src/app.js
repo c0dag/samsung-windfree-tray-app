@@ -205,6 +205,7 @@ function filterNote(device) {
 
 function renderSettings(device) {
   byId('device-name').textContent = device.nome ?? '';
+  byId('device-note').textContent = [device.nome, view?.ip].filter(Boolean).join(' · ');
   for (const toggle of document.querySelectorAll('[data-setting]')) {
     toggle.setAttribute('aria-checked', String(device[toggle.dataset.setting] === 'on'));
   }
@@ -251,13 +252,13 @@ function renderDevice(device) {
 
 function statusFor(current) {
   if (current?.error?.kind === 'failed') {
-    return { tone: 'error', icon: 'cloud-off', text: 'Sem resposta do SmartThings', retry: true };
+    return { tone: 'error', icon: 'wifi-off', text: current.error.message || 'Ar sem resposta', retry: true };
   }
   if (current?.error?.kind === 'unconfirmed') {
     const names = current.error.keys.map((key) => UNCONFIRMED_NAMES[key] ?? key);
     return { tone: 'error', icon: 'triangle-alert', text: `O ar não confirmou ${joinNames(names)}` };
   }
-  if (!current?.device) return { tone: 'busy', icon: 'loader-circle', text: 'Conectando ao SmartThings…' };
+  if (!current?.device) return { tone: 'busy', icon: 'loader-circle', text: 'Conectando…' };
   if (current.syncing) return { tone: 'busy', icon: 'loader-circle', text: 'Sincronizando…' };
   if (current.held.length > 0) return { tone: 'quiet', icon: 'clock', text: 'Aplica quando ligar' };
   return { tone: 'ok', icon: 'shield-check', text: `Conectado · ${current?.source === 'cloud' ? 'nuvem' : 'local'}` };
