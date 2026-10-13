@@ -235,7 +235,7 @@ function renderDevice(device) {
   byId('room-humidity').textContent = `${device.umidade}%`;
   const disp = byId('unit-display');
   const dtemp = Math.min(TEMP_MAX, Math.max(TEMP_MIN, device.temp));
-  const dfile = `assets/ac-${dtemp}.png`;
+  const dfile = `assets/display-${dtemp}.png`;
   if (!disp.getAttribute('src')?.endsWith(dfile)) disp.setAttribute('src', dfile);
   byId('power').setAttribute('aria-label', device.ligado ? 'Desligar o ar' : 'Ligar o ar');
   byId('windfree').setAttribute('aria-checked', String(isWindFree(device.extra)));

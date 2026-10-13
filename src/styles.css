@@ -1050,7 +1050,6 @@ svg.lucide {
 .unit-display {
   position: absolute; top: 24px; left: 50%; width: 290px; z-index: 2;
   transform: translateX(-50%);
-  clip-path: inset(68.5% 3.5% 9% 78%);
   pointer-events: none; -webkit-user-drag: none;
   opacity: 0; transition: opacity 0.4s;
 }
