@@ -8,7 +8,11 @@ fees. It talks straight to the unit on your LAN using Samsung's OCF local protoc
 Built with **Rust + Tauri**: ~5 MB installer, ~35 MB RAM. Lives in the tray with the
 current set temperature drawn on the icon, and starts with Windows.
 
-![WindFree](docs/screenshot.png)
+<p align="center">
+  <img src="docs/screenshot.png" width="46%" alt="Main view — the 3D unit with live airflow and the temperature on the display" />
+  &nbsp;
+  <img src="docs/settings.png" width="46%" alt="Settings — favorites, energy chart, off-timer and alerts" />
+</p>
 
 ## Features
 
