@@ -9,9 +9,9 @@ Built with **Rust + Tauri**: ~5 MB installer, ~35 MB RAM. Lives in the tray with
 current set temperature drawn on the icon, and starts with Windows.
 
 <p align="center">
-  <img src="docs/main.png" width="46%" alt="Main view — the 3D unit with live airflow and the temperature on the display" />
+  <img src="docs/preview-main.png" width="46%" alt="Main view — the 3D unit with live airflow and the temperature on the display" />
   &nbsp;
-  <img src="docs/settings.png" width="46%" alt="Settings — favorites, energy chart, off-timer and alerts" />
+  <img src="docs/preview-settings.png" width="46%" alt="Settings — favorites, energy chart, off-timer and alerts" />
 </p>
 
 ## Features
