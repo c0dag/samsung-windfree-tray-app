@@ -104,7 +104,7 @@ impl Worker {
             running: false,
             visible: false,
             last_set: Instant::now(),
-            last_poll: Instant::now() - Duration::from_secs(120),
+            last_poll: Instant::now(),
         }
     }
 
